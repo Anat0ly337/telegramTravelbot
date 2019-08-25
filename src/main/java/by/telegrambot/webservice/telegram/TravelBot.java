@@ -14,9 +14,7 @@ import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.Keyboard
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 public class TravelBot extends TelegramLongPollingBot {
     private final static String SHOWCITIES = "/showcities";
@@ -24,13 +22,13 @@ public class TravelBot extends TelegramLongPollingBot {
     private final static String HELP = "/help";
     private final static String BOTNAME = "Pettyzebot";
     private final static String BOTTOKEN = "807113567:AAGFycxZgS2-Wc8KzmBexVnkljly9Tp_hL4";
-    private final static String COMMANDS = "Чтобы посмотреть описание места /place/{место}  /n" +
-            "Чтобы посмотреть города /showcities /n" +
-            "Чтобы посмотреть места /showplaces /n" +
-            "Чтобы посмотреть места в городе /placesbycity/{город} /n";
+    private final static String COMMANDS = "Чтобы посмотреть описание места /place/{место}" + "" +
+            "Чтобы посмотреть города /showcities" + "" +
+            "Чтобы посмотреть места /showplaces" + "" +
+            "Чтобы посмотреть места в городе /placesbycity/{город}";
     private final RestTemplate restTemplate = new RestTemplate();
     private ResponseEntity<ArrayList> response;
-    private JSONObject jsonObject;
+
 
     @Override
     public void onUpdateReceived(Update update) {
@@ -42,22 +40,35 @@ public class TravelBot extends TelegramLongPollingBot {
 
     //Удобнее было бы сделать через базу данных, где хранится ключ значение на каждую команду, но т.к. проект небольшой, поэтому "нахардкодил" через switchcase
     private void pickMessage(Message message) {
-        String text = message.getText();
+        String text = message.getText().toLowerCase();
         switch (text) {
             case SHOWCITIES:
                 response = restTemplate.getForEntity("http://localhost:8080/city/allcities", ArrayList.class);
-                sendMessage(message, parseJsonObject(response));
+                if (response.getStatusCodeValue() == 200) {
+                    sendMessage(message, parseJsonObject(response));
+                }
                 break;
             case SHOWPLACES:
                 response = restTemplate.getForEntity("http://localhost:8080/cityinfo/allplaces", ArrayList.class);
-                sendMessage(message, parseJsonObject(response));
+                if (response.getStatusCodeValue() == 200) {
+                    sendMessage(message, parseJsonObject(response));
+                }
                 break;
             case HELP:
                 sendMessage(message, COMMANDS);
                 break;
             default:
-                ResponseEntity<ArrayList> response = restTemplate.getForEntity("http://localhost:8080/cityinfo" + text, ArrayList.class);
-                sendMessage(message, parseJsonObject(response));
+                if (text.startsWith("/placesbycity")) {
+                    response = restTemplate.getForEntity("http://localhost:8080/cityinfo" + text, ArrayList.class);
+                    if (response.getStatusCodeValue() == 200) {
+                        sendMessage(message, parseJsonObject(response));
+                    }
+                } else if (text.startsWith("/place")) {
+                    ResponseEntity<String> respons = restTemplate.getForEntity("http://localhost:8080/cityinfo" + text, String.class);
+                    if (respons.getStatusCodeValue() == 200) {
+                        sendMessage(message, respons.getBody());
+                    }
+                }
         }
     }
 
@@ -80,7 +91,7 @@ public class TravelBot extends TelegramLongPollingBot {
         JSONArray myresponse = jsonObject.getJSONArray("body");
         StringBuilder stringBuilder = new StringBuilder();
         for (int i = 0; i < myresponse.length(); i++) {
-            stringBuilder.append(myresponse.getJSONObject(i).getString("name") + "\n");
+            stringBuilder.append(myresponse.getJSONObject(i).get("name") + "\n");
         }
         return stringBuilder.toString();
     }

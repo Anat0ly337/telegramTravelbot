@@ -7,7 +7,7 @@ import javax.persistence.*;
 @AllArgsConstructor
 @NoArgsConstructor
 @EqualsAndHashCode(callSuper = true)
-@ToString(of = {"NAME"})
+@ToString(of = {"name"})
 @Entity
 @Table(name = "CITYINFO")
 public class CityInfo extends BaseEntity<Long> {

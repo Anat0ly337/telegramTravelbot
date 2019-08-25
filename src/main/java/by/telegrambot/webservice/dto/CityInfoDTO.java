@@ -4,7 +4,14 @@ import lombok.Data;
 
 @Data
 public class CityInfoDTO {
-    String name;
-    String description;
+    private String name;
+    private String description;
 
+    @Override
+    public String toString() {
+        return "CityInfoDTO{" +
+                "name='" + name + '\'' +
+                ", description='" + description + '\'' +
+                '}';
+    }
 }

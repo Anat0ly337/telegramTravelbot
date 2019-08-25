@@ -9,13 +9,13 @@ import java.util.Set;
 @EqualsAndHashCode(callSuper = true, exclude = {"cityInfo"})
 @NoArgsConstructor
 @AllArgsConstructor
-@ToString(of = {"NAME"})
+@ToString(of = {"name"})
 @Entity
 @Table(name = "CITY")
 public class City extends BaseEntity<Long> {
     private static final long serialVersionUID = -3723496888477359242L;
 
-    @Column(name = "NAME")
+    @Column(name = "NAME",nullable = false)
     private String name;
 
     @OneToMany(mappedBy = "city", cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)

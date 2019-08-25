@@ -9,6 +9,7 @@ import by.telegrambot.webservice.service.CityService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -35,6 +36,9 @@ public class CityInfoController {
     public ResponseEntity<String> getDescription(@PathVariable String name){
         CityInfo cityInfo = cityInfoService.findByName(name);
         String description = cityInfo.getDescription();
+        if (description==null){
+            return new ResponseEntity<>("не найдено",HttpStatus.NOT_FOUND);
+        }
         return new ResponseEntity<>(description,HttpStatus.OK);
     }
 
@@ -42,9 +46,13 @@ public class CityInfoController {
     public ResponseEntity<List<CityInfoDTO>> getCityByName(@PathVariable String name) {
         City city = cityService.findByName(name);
         Set<CityInfo> cityInfo = city.getCityInfo();
+        if (cityInfo==null){
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
         return new ResponseEntity<>(cityInfoService.cityConvertList(cityInfo), HttpStatus.OK);
     }
 
+    @PreAuthorize("hasRole('ADMIN')")
     @PutMapping
     public ResponseEntity<CityInfo> createOrUpdate(@RequestBody CityInfoDTO cityInfoDTO) {
         CityInfo cityInfo = new CityInfo();
@@ -52,6 +60,7 @@ public class CityInfoController {
         return new ResponseEntity<>(cityInfoService.saveOrUpdate(cityInfo), HttpStatus.CREATED);
     }
 
+    @PreAuthorize("hasRole('ADMIN')")
     @DeleteMapping("{id}")
     public void delete(@PathVariable Long id) {
         cityInfoService.delete(id);

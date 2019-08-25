@@ -1,13 +1,12 @@
 package by.telegrambot.webservice.service.impl;
 
-import by.telegrambot.webservice.dto.CityDTO;
 import by.telegrambot.webservice.dto.CityInfoDTO;
-import by.telegrambot.webservice.entity.City;
 import by.telegrambot.webservice.entity.CityInfo;
 import by.telegrambot.webservice.repository.CityInfoRepo;
 import by.telegrambot.webservice.service.CityInfoService;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CachePut;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -29,6 +28,8 @@ public class CityInfoServiceImpl implements CityInfoService {
         this.cityInfoRepo = cityInfoRepo;
         this.modelMapper = modelMapper;
     }
+
+    @CachePut(value = "cityinfocachebynamedto")
     @Override
     public CityInfoDTO findByNameDTO(String entity) {
         return convertToDto(cityInfoRepo.findByName(entity));
@@ -51,30 +52,33 @@ public class CityInfoServiceImpl implements CityInfoService {
         return cityInfoRepo.findById(id);
     }
 
+    @CachePut(value = "cityinfocachefindall")
     @Override
     public List<CityInfo> findAll() {
         return cityInfoRepo.findAll();
     }
 
+    @CachePut(value = "cityinfocachebyname")
     @Override
     public CityInfo findByName(String entity) {
-        return null;
+        return cityInfoRepo.findByName(entity);
     }
 
     @Override
     public List<CityInfoDTO> cityConvertList(Set<CityInfo> cityInfoSet) {
         List<CityInfoDTO> cityInfoDTOArrayList = new ArrayList<>();
-        for (CityInfo cityInfo : cityInfoSet){
+        for (CityInfo cityInfo : cityInfoSet) {
             cityInfoDTOArrayList.add(convertToDto(cityInfo));
         }
         return cityInfoDTOArrayList;
     }
 
+    @CachePut(value = "cityinfocachefindalldto")
     @Override
     public List<CityInfoDTO> findAllCityInfo() {
         List<CityInfoDTO> dtoArrayList = new ArrayList<>();
         List<CityInfo> entityList = findAll();
-        for (CityInfo cityInfo : entityList){
+        for (CityInfo cityInfo : entityList) {
             dtoArrayList.add(convertToDto(cityInfo));
         }
         return dtoArrayList;

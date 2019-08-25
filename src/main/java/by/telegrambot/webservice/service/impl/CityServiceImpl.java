@@ -1,14 +1,13 @@
 package by.telegrambot.webservice.service.impl;
 
 import by.telegrambot.webservice.dto.CityDTO;
-import by.telegrambot.webservice.dto.CityInfoDTO;
 import by.telegrambot.webservice.entity.City;
-import by.telegrambot.webservice.entity.CityInfo;
 import by.telegrambot.webservice.repository.CityInfoRepo;
 import by.telegrambot.webservice.repository.CityRepo;
 import by.telegrambot.webservice.service.CityService;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CachePut;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -38,11 +37,13 @@ public class CityServiceImpl implements CityService {
         return cityRepo.save(city);
     }
 
+
     @Override
     public Optional<City> getById(Long id) {
         return cityRepo.findById(id);
     }
 
+    @CachePut(value = "citycachebyname")
     @Override
     public CityDTO findByNameDTO(String entity) {
         return convertToDto(cityRepo.findByName(entity));
@@ -53,10 +54,11 @@ public class CityServiceImpl implements CityService {
         return cityRepo.findByName(entity);
     }
 
+    @CachePut(value = "findallcitydto")
     @Override
     public List<CityDTO> findAllCity() {
         List<CityDTO> dtoArrayList = new ArrayList<>();
-        List<City> entityList = findAll();
+        List<City> entityList = cityRepo.findAll();
         for (City cityInfo : entityList){
             dtoArrayList.add(convertToDto(cityInfo));
         }
