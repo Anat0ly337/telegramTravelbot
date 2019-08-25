@@ -13,12 +13,13 @@ import java.util.Set;
 @Entity
 @Table(name = "CITY")
 public class City extends BaseEntity<Long> {
-
     private static final long serialVersionUID = -3723496888477359242L;
 
-    @Column(name = "NAME", nullable = false, unique = true)
+    @Column(name = "NAME")
     private String name;
 
-    @OneToMany(mappedBy = "city", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "city", cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
     private Set<CityInfo> cityInfo;
+
+
 }

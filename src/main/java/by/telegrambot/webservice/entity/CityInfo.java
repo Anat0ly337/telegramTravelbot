@@ -11,7 +11,6 @@ import javax.persistence.*;
 @Entity
 @Table(name = "CITYINFO")
 public class CityInfo extends BaseEntity<Long> {
-
     private static final long serialVersionUID = 3212313771661405693L;
 
     @Column(name = "NAME", nullable = false)
@@ -20,7 +19,7 @@ public class CityInfo extends BaseEntity<Long> {
     @Column(name = "DESCRIPTION")
     private String description;
 
-    @ManyToOne(targetEntity = City.class, fetch = FetchType.LAZY)
+    @ManyToOne
     @JoinColumn(name = "CITY_ID")
     private City city;
 
