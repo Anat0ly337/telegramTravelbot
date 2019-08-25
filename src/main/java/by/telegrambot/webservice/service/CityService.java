@@ -12,5 +12,5 @@ public interface CityService extends CrudService<City,Long> {
 
     City findByName(String entity);
 
-    List<CityInfoDTO> findAllCityInfo();
+    List<CityDTO> findAllCity();
 }

@@ -3,6 +3,7 @@ package by.telegrambot.webservice.service.impl;
 import by.telegrambot.webservice.dto.CityDTO;
 import by.telegrambot.webservice.dto.CityInfoDTO;
 import by.telegrambot.webservice.entity.City;
+import by.telegrambot.webservice.entity.CityInfo;
 import by.telegrambot.webservice.repository.CityInfoRepo;
 import by.telegrambot.webservice.repository.CityRepo;
 import by.telegrambot.webservice.service.CityService;
@@ -12,6 +13,7 @@ import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -52,8 +54,13 @@ public class CityServiceImpl implements CityService {
     }
 
     @Override
-    public List<CityInfoDTO> findAllCityInfo() {
-        return null;
+    public List<CityDTO> findAllCity() {
+        List<CityDTO> dtoArrayList = new ArrayList<>();
+        List<City> entityList = findAll();
+        for (City cityInfo : entityList){
+            dtoArrayList.add(convertToDto(cityInfo));
+        }
+        return dtoArrayList;
     }
 
     @Transactional

@@ -21,5 +21,4 @@ public class City extends BaseEntity<Long> {
     @OneToMany(mappedBy = "city", cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
     private Set<CityInfo> cityInfo;
 
-
 }

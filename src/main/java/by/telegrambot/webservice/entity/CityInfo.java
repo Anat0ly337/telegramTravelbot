@@ -19,7 +19,7 @@ public class CityInfo extends BaseEntity<Long> {
     @Column(name = "DESCRIPTION")
     private String description;
 
-    @ManyToOne
+    @ManyToOne(targetEntity = City.class,fetch = FetchType.LAZY)
     @JoinColumn(name = "CITY_ID")
     private City city;
 

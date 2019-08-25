@@ -77,7 +77,6 @@ public class CityInfoServiceImpl implements CityInfoService {
         for (CityInfo cityInfo : entityList){
             dtoArrayList.add(convertToDto(cityInfo));
         }
-
         return dtoArrayList;
     }
 

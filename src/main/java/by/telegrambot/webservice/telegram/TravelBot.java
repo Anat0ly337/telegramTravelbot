@@ -1,7 +1,8 @@
 package by.telegrambot.webservice.telegram;
 
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.context.annotation.PropertySource;
+import org.json.JSONArray;
+import org.json.JSONObject;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.client.RestTemplate;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
@@ -11,34 +12,60 @@ import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboardMar
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.KeyboardButton;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.KeyboardRow;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
+
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class TravelBot extends TelegramLongPollingBot {
     private final static String SHOWCITIES = "/showcities";
     private final static String SHOWPLACES = "/showplaces";
+    private final static String HELP = "/help";
     private final static String BOTNAME = "Pettyzebot";
     private final static String BOTTOKEN = "807113567:AAGFycxZgS2-Wc8KzmBexVnkljly9Tp_hL4";
+    private final static String COMMANDS = "Чтобы посмотреть описание места /place/{место}  /n" +
+            "Чтобы посмотреть города /showcities /n" +
+            "Чтобы посмотреть места /showplaces /n" +
+            "Чтобы посмотреть места в городе /placesbycity/{город} /n";
+    private final RestTemplate restTemplate = new RestTemplate();
+    private ResponseEntity<ArrayList> response;
+    private JSONObject jsonObject;
 
     @Override
     public void onUpdateReceived(Update update) {
         Message message = update.getMessage();
         if (message.hasText()) {
-            SendMessage sendMessage = new SendMessage().setChatId(message.getChatId()).setText("dsadsasd");
-            try {
-                setButton(sendMessage);
-                execute(sendMessage);
-            } catch (TelegramApiException e) {
-                e.printStackTrace();
-            }
+            pickMessage(message);
         }
     }
 
-    private void sendMessage(Message message) {
+    //Удобнее было бы сделать через базу данных, где хранится ключ значение на каждую команду, но т.к. проект небольшой, поэтому "нахардкодил" через switchcase
+    private void pickMessage(Message message) {
+        String text = message.getText();
+        switch (text) {
+            case SHOWCITIES:
+                response = restTemplate.getForEntity("http://localhost:8080/city/allcities", ArrayList.class);
+                sendMessage(message, parseJsonObject(response));
+                break;
+            case SHOWPLACES:
+                response = restTemplate.getForEntity("http://localhost:8080/cityinfo/allplaces", ArrayList.class);
+                sendMessage(message, parseJsonObject(response));
+                break;
+            case HELP:
+                sendMessage(message, COMMANDS);
+                break;
+            default:
+                ResponseEntity<ArrayList> response = restTemplate.getForEntity("http://localhost:8080/cityinfo" + text, ArrayList.class);
+                sendMessage(message, parseJsonObject(response));
+        }
+    }
+
+    private void sendMessage(Message message, String text) {
         SendMessage sendMessage = new SendMessage();
         sendMessage.enableMarkdown(true);
         sendMessage.setChatId(message.getChatId());
-        sendMessage.setText(message.getText());
+        sendMessage.setText(text);
         sendMessage.setReplyToMessageId(message.getMessageId());
         try {
             setButton(sendMessage);
@@ -48,17 +75,14 @@ public class TravelBot extends TelegramLongPollingBot {
         }
     }
 
-    private void pickMessage(Message message) {
-        String text = message.getText().toLowerCase();
-        switch (text) {
-            case SHOWCITIES:
-
-                break;
-            case SHOWPLACES:
-
-                break;
-            default:
+    private String parseJsonObject(ResponseEntity response) {
+        JSONObject jsonObject = new JSONObject(response);
+        JSONArray myresponse = jsonObject.getJSONArray("body");
+        StringBuilder stringBuilder = new StringBuilder();
+        for (int i = 0; i < myresponse.length(); i++) {
+            stringBuilder.append(myresponse.getJSONObject(i).getString("name") + "\n");
         }
+        return stringBuilder.toString();
     }
 
     private void setButton(SendMessage sendMessage) {
@@ -72,6 +96,7 @@ public class TravelBot extends TelegramLongPollingBot {
         KeyboardRow keyboardRow = new KeyboardRow();
         keyboardRow.add(new KeyboardButton(SHOWCITIES));
         keyboardRow.add(new KeyboardButton(SHOWPLACES));
+        keyboardRow.add(new KeyboardButton((HELP)));
         keyboardRowList.add(keyboardRow);
         replyKeyboardMarkup.setKeyboard(keyboardRowList);
     }

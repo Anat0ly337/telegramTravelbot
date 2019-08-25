@@ -27,13 +27,19 @@ public class CityInfoController {
         this.cityInfoService = cityInfoService;
     }
 
-    @GetMapping(value = "/places")
+    @GetMapping(value = "/allplaces")
     public ResponseEntity<List<CityInfoDTO>> getAll() {
         return new ResponseEntity<>(cityInfoService.findAllCityInfo(), HttpStatus.OK);
     }
+    @GetMapping("/place/{name}")
+    public ResponseEntity<String> getDescription(@PathVariable String name){
+        CityInfo cityInfo = cityInfoService.findByName(name);
+        String description = cityInfo.getDescription();
+        return new ResponseEntity<>(description,HttpStatus.OK);
+    }
 
-    @GetMapping("/placesbycity")
-    public ResponseEntity<List<CityInfoDTO>> getCityByName(@RequestParam String name) {
+    @GetMapping("/placesbycity/{name}")
+    public ResponseEntity<List<CityInfoDTO>> getCityByName(@PathVariable String name) {
         City city = cityService.findByName(name);
         Set<CityInfo> cityInfo = city.getCityInfo();
         return new ResponseEntity<>(cityInfoService.cityConvertList(cityInfo), HttpStatus.OK);
