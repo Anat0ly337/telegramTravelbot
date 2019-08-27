@@ -1,5 +1,7 @@
 package by.telegrambot.webservice.telegram;
 
+import by.telegrambot.webservice.dto.CityDTO;
+import by.telegrambot.webservice.dto.CityInfoDTO;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.springframework.http.ResponseEntity;
@@ -29,7 +31,6 @@ public class TravelBot extends TelegramLongPollingBot {
     private final RestTemplate restTemplate = new RestTemplate();
     private ResponseEntity<ArrayList> response;
 
-
     @Override
     public void onUpdateReceived(Update update) {
         Message message = update.getMessage();
@@ -43,13 +44,13 @@ public class TravelBot extends TelegramLongPollingBot {
         String text = message.getText().toLowerCase();
         switch (text) {
             case SHOWCITIES:
-                response = restTemplate.getForEntity("http://localhost:8080/city/allcities", ArrayList.class);
+               response = restTemplate.getForEntity("http://localhost:8080/city/allcities", ArrayList.class);
                 if (response.getStatusCodeValue() == 200) {
-                    sendMessage(message, parseJsonObject(response));
+                    sendMessage(message,parseJsonObject(response));
                 }
                 break;
             case SHOWPLACES:
-                response = restTemplate.getForEntity("http://localhost:8080/cityinfo/allplaces", ArrayList.class);
+                 response = restTemplate.getForEntity("http://localhost:8080/cityinfo/allplaces", ArrayList.class);
                 if (response.getStatusCodeValue() == 200) {
                     sendMessage(message, parseJsonObject(response));
                 }
@@ -68,6 +69,8 @@ public class TravelBot extends TelegramLongPollingBot {
                     if (respons.getStatusCodeValue() == 200) {
                         sendMessage(message, respons.getBody());
                     }
+                }else{
+                    sendMessage(message,"ничего не найдено");
                 }
         }
     }
@@ -89,9 +92,10 @@ public class TravelBot extends TelegramLongPollingBot {
     private String parseJsonObject(ResponseEntity response) {
         JSONObject jsonObject = new JSONObject(response);
         JSONArray myresponse = jsonObject.getJSONArray("body");
+
         StringBuilder stringBuilder = new StringBuilder();
         for (int i = 0; i < myresponse.length(); i++) {
-            stringBuilder.append(myresponse.getJSONObject(i).get("name") + "\n");
+            stringBuilder.append(myresponse.getJSONObject(i).getString("name") + "\n");
         }
         return stringBuilder.toString();
     }

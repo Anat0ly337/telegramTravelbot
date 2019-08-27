@@ -12,7 +12,7 @@ INSERT INTO city
 (id, name)
 VALUES (1, 'minsk'),
        (2, 'moscow'),
-       (3, 'new_york'),
+       (3, 'newyork'),
        (4, 'paris');
 
 DROP TABLE IF EXISTS cityinfo;
